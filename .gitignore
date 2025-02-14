@@ -1,0 +1,10 @@
+ffmpeg
+mkvtoolnix
+realesrgan-ncnn-vulkan
+7zr.exe
+
+logs/*
+input/*
+output/*
+tmp_frames/*
+upscale_frames/*
