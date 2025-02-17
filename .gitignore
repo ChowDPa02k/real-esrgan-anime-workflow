@@ -2,6 +2,7 @@ ffmpeg
 mkvtoolnix
 realesrgan-ncnn-vulkan
 7zr.exe
+.ipynb_checkpoints
 
 logs/*
 input/*
