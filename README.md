@@ -4,7 +4,7 @@
 
 This Python notebook will utilize r-esrgan-ncnn-vulkan, ffmpeg, and mkvtoolnix to automate the process of super resolution, re-encoding, and remuxing of MKV files. 
 
-For a 23.976fps, 24-minute TV anime, running this workflow requires **at least 500GB of hard drive space** and a graphics card with **more than 4GB of VRAM**.
+For a 23.976fps, 24-minute TV anime, running this workflow requires **at least 500GB of hard drive space**.
 
 The workflow provides preset x264 and x265 encoding parameters that ensure the encoding quality is adequate for TV (rather than Bluray) sources. If you have more stringent standards or plan to encode Bluray sources, set the `enable_encoding` parameter to `False` and seek out a higher-quality encoding solution.
 
