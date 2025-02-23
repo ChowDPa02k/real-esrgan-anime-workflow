@@ -29,7 +29,7 @@ Such discrepancies could serve as valuable references for video compression rese
 
 | CPU            | GPU          | OS      | Extracting | Upscaling         | Encoding |
 | -------------- | ------------ | ------- | ---------- | ----------------- | -------- |
-| Ryzen 9950x    | RTX 4070 TiS | Windows | 8.7x       | 58:32 at -j 16:16 | 10h35m   |
-| Core i9-13900K | RTX 4090     | Windows | 7.3x       | 41:41 at -j 16:16 | 17h55m   |
+| Ryzen 9950x    | RTX 4070 TiS | Windows | 8.7x       | 58:32 at -j 12:24:16 | 10h35m   |
+| Core i9-13900K | RTX 4090     | Windows | 7.3x       | 41:41 at -j 12:24:16 | 17h55m   |
 |                |              |         |            |                   |          |
 
