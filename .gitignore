@@ -3,9 +3,10 @@ mkvtoolnix
 realesrgan-ncnn-vulkan
 7zr.exe
 .ipynb_checkpoints
+.virtual_documents
 
 logs/*
-input/*
+input/*.mkv
 output/*
 tmp_frames/*
 upscale_frames/*
