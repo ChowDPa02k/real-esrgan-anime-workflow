@@ -52,7 +52,7 @@ def parse_args():
     parser.add_argument('--enable-avx512',
                         action='store_true',
                         dest='enable_avx512',
-                        help='Disable AVX-512 acceleration while encoding (default: %(default)s)')
+                        help='Enable AVX-512 acceleration while encoding (default: %(default)s)')
     parser.set_defaults(enable_avx512=False)
     parser.add_argument('--gpus',
                         type=str,

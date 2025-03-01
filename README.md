@@ -41,7 +41,7 @@ options:
   --default-fps DEFAULT_FPS
                         Default output fps when input fps undetected (default: 24000/1001)
   --disable-encoding    Disable video encoding, move png series to output folder
-  --enable-avx512       Disable AVX-512 acceleration while encoding (default: False)
+  --enable-avx512       Enable AVX-512 acceleration while encoding (default: False)
   --gpus GPUS           Specify GPU devices (default: 0)
   --threads THREADS     Thread assignment: <input>:<process>:<output> (default: 12:20:16)
   --proxy PROXY         Proxy server address (default: empty)
