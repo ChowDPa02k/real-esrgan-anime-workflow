@@ -10,3 +10,4 @@ input/*.mkv
 output/*
 tmp_frames/*
 upscale_frames/*
+id_rsa*

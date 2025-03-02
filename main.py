@@ -510,62 +510,12 @@ def upscale_frames(input_folder: str = 'tmp_frames', output_folder: str = 'upsca
 # Encode params are tuned for 4K animation
 
 # In[7]:
+import yaml
 
-
-x264_params = ':'.join([
-    "deblock=-1,-1", 
-    "keyint=600", 
-    "min-keyint=1", 
-    "bframes=8", 
-    "ref=5", 
-    "qcomp=0.6", 
-    "no-mbtree=1", 
-    "rc-lookahead=60", 
-    "aq-strength=0.8", 
-    "me=tesa", 
-    "psy-rd=0,0", 
-    "chroma-qp-offset=-1", 
-    "no-fast-pskip=1", 
-    "aq-mode=2", 
-    "colorprim=bt709", 
-    "transfer=bt709", 
-    "colormatrix=bt709", 
-    "chromaloc=0", 
-    "fullrange=off"
-])
-
-x265_params = ':'.join([
-    "deblock=-1,-1", 
-    "ctu=64", 
-    "qg-size=8", 
-    "crqpoffs=-2", 
-    "cbqpoffs=-2", 
-    "me=4", 
-    "subme=6", 
-    "merange=64", 
-    "b-intra=1", 
-    "limit-tu=4", 
-    "no-amp=1", 
-    "ref=6", 
-    "weightb=1", 
-    "keyint=360", 
-    "min-keyint=1", 
-    "bframes=6", 
-    "aq-mode=1", 
-    "aq-strength=0.8", 
-    "rd=5", 
-    "psy-rd=2.0", 
-    "psy-rdoq=1.0", 
-    "rdoq-level=2", 
-    "no-open-gop=1", 
-    "rc-lookahead=80", 
-    "scenecut=40", 
-    "qcomp=0.65", 
-    "no-strong-intra-smoothing=1",
-    "nr-intra=0",
-    "nr-inter=0"
-])
-
+with open('encode_params.yaml', 'r') as f:
+    params = yaml.safe_load(f)
+    x264_params = ':'.join(params['x264'])
+    x265_params = ':'.join(params['x265'])
 
 def get_framerate(input_file: str):
     cmd = f"{_ffprobe} -v error -select_streams v -of default=noprint_wrappers=1:nokey=1 -show_entries stream=r_frame_rate".split() + [input_file]
@@ -575,20 +525,58 @@ def get_framerate(input_file: str):
     else:
         return default_fps
 
-def encode_frames(output_file: str, input_folder: str = 'upscale_frames', raw_file: str = '', engine: str = 'libx264', crf: int = 18):
+def encode_frames(output_file: str, input_folder: str = 'upscale_frames', raw_file: str = '', engine: str = 'libx264', crf: int = 18, remote: bool = False, remote_path: str = ''):
     output_file = os.path.join('output', output_file)
 
+    _system_type = system_type
+    if remote:
+        host = 'zhoudingpeng@192.168.1.108'
+        key = 'id_rsa.txt'
+        ssh_cmd = ['ssh', '-o', 'StrictHostKeyChecking=accept-new', '-i', key, host]
+        cmd_check = ['uname', '-s']
+        _system_type = subprocess.run(ssh_cmd + cmd_check, capture_output=True, text=True).stdout.strip()
+        input_folder = f'{remote_path}/{input_folder}' if _system_type in ['Linux', 'Darwin'] else os.path.join(remote_path, input_folder)
+
     # fps = get_framerate(raw_file)
-    if engine == 'libx264':
-        cmd = [_ffmpeg, '-framerate', src_fps, '-i', f'{input_folder}/frame_%08d.png', '-c:v', 'libx264', '-preset', 'veryslow', '-crf', str(crf), '-pix_fmt', 'yuv420p', '-x264-params', x264_params, '-r', src_fps, output_file]
-    elif engine == 'libx265':
-        cmd = [_ffmpeg, '-framerate', src_fps, '-i', f'{input_folder}/frame_%08d.png', '-c:v', 'libx265', '-preset', 'slower', '-crf', str(crf), '-pix_fmt', 'yuv420p10le', '-x265-params', x265_params, '-r', src_fps, output_file]
-    else:
-        tqdm.write(f'Unsupported engine: {engine}')
-        return 1
+    if _system_type == 'Windows' or system_type == 'Linux':
+        if engine == 'libx264':
+            cmd = [_ffmpeg, '-framerate', src_fps, '-i', f'{input_folder}/frame_%08d.png', '-c:v', 'libx264', '-preset', 'veryslow', '-crf', str(crf), '-pix_fmt', 'yuv420p', '-x264-params', x264_params, '-r', src_fps, output_file]
+        elif engine == 'libx265':
+            cmd = [_ffmpeg, '-framerate', src_fps, '-i', f'{input_folder}/frame_%08d.png', '-c:v', 'libx265', '-preset', 'slower', '-crf', str(crf), '-pix_fmt', 'yuv420p10le', '-x265-params', x265_params, '-r', src_fps, output_file]
+        else:
+            print(f'Unsupported engine: {engine}')
+            return 1
     
-    process = TqdmFfmpegProcess(cmd, raw_file=raw_file, ffmpeg_log_file=f'logs/{src_file}_encode.log')
-    return process.run(prefix=f'Encoding {"AVC" if engine == "libx264" else "HEVC"}')
+    elif _system_type == 'Darwin':
+        if engine == 'libx265':
+            cmd = [_ffmpeg, '-framerate', src_fps, '-i', f'{input_folder}/frame_%08d.png', 
+                '-c:v', 'hevc_videotoolbox', '-profile:v', 'main10', '-q:v', '70', '-max_ref_frames', '6', '-pix_fmt', 'p010le', 
+                '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-tag:v', 'hvc1', 
+                '-r', src_fps, output_file]
+        elif engine == 'libx264':
+            cmd = [_ffmpeg, '-framerate', src_fps, '-i', f'{input_folder}/frame_%08d.png', 
+                '-c:v', 'h264_videotoolbox', '-profile:v', 'high', '-q:v', '70', '-max_ref_frames', '6', '-pix_fmt', 'yuv420p',
+                '-r', src_fps, output_file]
+            
+    if remote:
+        subprocess.run(ssh_cmd + ['mkdir', '-p', 'output'], capture_output=True, text=True, stderr=subprocess.STDOUT)
+        result = subprocess.run(ssh_cmd + cmd, capture_output=True, stderr=subprocess.STDOUT, text=True)
+        if result.returncode == 0:
+            tqdm.write(result.stdout)
+            cmd = ['scp', '-i', key, f'{host}:{output_file}', output_file]
+            result = subprocess.run(ssh_cmd + cmd, capture_output=True, text=True)
+            if result.returncode == 0:
+                tqdm.write(result.stdout)
+                result_transfer = subprocess.run(ssh_cmd + ['rm', '-rf', 'output'], capture_output=True, text=True, stderr=subprocess.STDOUT)
+                tqdm.write(result_transfer.stdout)
+        return result.returncode
+    else:
+        process = TqdmFfmpegProcess(cmd, raw_file=raw_file, ffmpeg_log_file=f'logs/{src_file}_encode.log')
+        try:
+            rtc = process.run(prefix=f'Encoding {"AVC" if engine == "libx264" else "HEVC"}')
+        except Exception as e:
+            return 1
+        return rtc
 
 
 # ## Remux Encoded Stream to Input file
