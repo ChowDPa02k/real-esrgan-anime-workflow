@@ -530,7 +530,7 @@ def encode_frames(output_file: str, input_folder: str = 'upscale_frames', raw_fi
 
     _system_type = system_type
     if remote:
-        host = 'zhoudingpeng@192.168.1.108'
+        host = 'root@192.168.1.108'
         key = 'id_rsa.txt'
         ssh_cmd = ['ssh', '-o', 'StrictHostKeyChecking=accept-new', '-i', key, host]
         cmd_check = ['uname', '-s']
