@@ -2,6 +2,8 @@
 
 > Powered by [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)
 
+如果对压制的理解只停留在码率大小的话，确实只配欣赏全是暗场色块、锯齿、彩虹纹的大奋作品。即使是裸压也应当具备一定质量的基准
+
 This Python notebook will utilize r-esrgan-ncnn-vulkan, ffmpeg, and mkvtoolnix to automate the process of super resolution, re-encoding, and remuxing of MKV files. 
 
 Processing frames using NCNN executable, so this notebook does not need any CUDA/ROCm python environment.
